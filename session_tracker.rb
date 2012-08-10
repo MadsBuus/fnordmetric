@@ -52,6 +52,9 @@ FnordMetric.namespace site do
   gauge :by_direct, :tick => 1.month.to_i, :title => "direct link"
   gauge :by_link, :tick => 1.month.to_i, :title => "link/relation"
 
+  gauge :document_count, :tick => 1.month.to_i, :title => "Documents viewed"
+  gauge :download_count, :tick => 1.month.to_i, :title => "Documents downloaded"
+
 # ---------------------------------------------------------------
 # Event handling
 # ---------------------------------------------------------------
@@ -63,6 +66,7 @@ FnordMetric.namespace site do
     if versid && topid
       incr_field :top_documents, topid
       incr_field :document_per_module_monthly, versid
+      incr :document_count
     end
     if data[:referrer]
       if data[:referrer].include?('/search')
@@ -89,6 +93,14 @@ FnordMetric.namespace site do
 
   event :"api#document#note_ref" do
     incr :note_refs_clicked
+  end
+
+  event :"download#xfile" do
+    incr :download_count
+  end
+
+  event :"download#file" do
+    incr :download_count
   end
 
   event :"search#index" do
@@ -160,6 +172,13 @@ FnordMetric.namespace site do
     :type => :pie,
     :width => 50,
     :gauges => [:by_toc, :by_search, :by_direct, :by_superhit, :by_link, :by_other]
+  }
+
+  widget 'Documents', {
+    :title => "Views vs. downloads",
+    :type => :pie,
+    :width => 50,
+    :gauges => [:document_count, :download_count]
   }
 
   widget 'Documents', {
